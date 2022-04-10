@@ -3,7 +3,7 @@ import math
 from sqf.common_expressions import TryCatchExpression, ForEachExpression, \
     WhileDoExpression, ForFromToDoExpression, ForSpecDoExpression, SwitchDoExpression, \
     IfThenSpecExpression, IfThenElseExpression, IfThenExpression, IfThenExitWithExpression
-from sqf.types import Anything, Keyword, Namespace, Number, Array, HashMap, Code, Type, Boolean, String, Nothing, Variable
+from sqf.types import Anything, Config, Keyword, Namespace, Number, Array, HashMap, Code, Side, Type, Boolean, String, Nothing, Variable
 from sqf.exceptions import SQFParserError
 from sqf.keywords import OP_ARITHMETIC, OP_COMPARISON, OP_LOGICAL
 from sqf.expressions import BinaryExpression, UnaryExpression
@@ -171,6 +171,25 @@ def _getVariableArray(lhs_v, rhs_v, interpreter):
     if not isinstance(rhs_v.value[0], (String, Nothing)):
         interpreter.exception(SQFParserError(
             rhs_v.value[0].position, 'getVariable array first element must be a string (is %s)' % type(rhs_v.value[0]).__name__))
+
+    variable = Variable(rhs_v.value[0].value)
+    variable.position = rhs_v.value[0].position
+    outcome = interpreter.value(variable, lhs_v.value)
+    if outcome == Nothing():
+        outcome = rhs_v.value[1]
+    return outcome
+
+
+def _get(lhs_v, rhs_v, interpreter):
+    variable = Variable(rhs_v.value)
+    variable.position = rhs_v.position
+    return interpreter.value(variable, lhs_v.value)
+
+
+def _getOrDefault(lhs_v, rhs_v, interpreter):
+    if len(rhs_v) != 2:
+        interpreter.exception(SQFParserError(
+            rhs_v.position, 'getOrDefault requires array of 2 elements (has %d)' % (len(rhs_v))))
 
     variable = Variable(rhs_v.value[0].value)
     variable.position = rhs_v.value[0].position
@@ -369,10 +388,6 @@ INTERPRETER_EXPRESSIONS = [
                      Nothing, Action(lambda lhs_v, rhs_v: lhs_v.set(rhs_v))),
     BinaryExpression(HashMap, Keyword('set'), Array,
                      Nothing, Action(lambda lhs_v, rhs_v: lhs_v.set(rhs_v))),
-    BinaryExpression(HashMap, Keyword('get'), Anything,
-                     Nothing, Action(lambda lhs_v, rhs_v: lhs_v.get(rhs_v))),
-    BinaryExpression(HashMap, Keyword('getOrDefault'), Array,
-                     Nothing, Action(lambda lhs_v, rhs_v: lhs_v.getOrDefault(rhs_v))),
 
     # Array related
     BinaryExpression(Array, Keyword('resize'), Number,
@@ -432,6 +447,12 @@ INTERPRETER_EXPRESSIONS = [
 
     BinaryExpression(String, Keyword('+'), String, String, Action(lambda lhs,
                      rhs: lhs.container + lhs.value + rhs.value + lhs.container)),
+
+    # hashmaps
+    BinaryExpression(HashMap, Keyword('get'), Anything,
+                     None, _get),
+    BinaryExpression(HashMap, Keyword('getOrDefault'), Array,
+                     None, _getOrDefault),
 ]
 
 for op in OP_COMPARISON:
