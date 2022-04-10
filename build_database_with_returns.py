@@ -61,10 +61,10 @@ WRONG_RETURN_TYPES = {
     'ammoonpylon': Anything
 }
 
-EXCLUDE = [
-    'get',
-    'getOrDefault'
-]
+WRONG_RHS_TYPES = {
+    'get': Anything,
+    'getordefault': Array
+}
 
 
 def _parse_type_names(type_names):
@@ -98,8 +98,7 @@ def _parse_return_type_names(return_type_names):
     return STRING_TO_TYPE_RETURN[return_type_name]
 
 
-url = 'https://raw.githubusercontent.com/intercept/intercept/master/src/' \
-      'client/headers/client/sqf_pointers_declaration.hpp'
+url = 'https://raw.githubusercontent.com/intercept/intercept/master/src/client/headers/client/sqf_pointers_declaration.hpp'
 data = urllib.request.urlopen(url).read().decode('utf-8').split('\n')
 
 
@@ -119,9 +118,7 @@ for line in data:
     op_name = sections[1]
 
     # Return type always comes last (some operators have incorrect values for whatever reason)
-    if op_name in EXCLUDE:
-        continue
-    elif op_name in WRONG_RETURN_TYPES:
+    if op_name in WRONG_RETURN_TYPES:
         return_type = WRONG_RETURN_TYPES[op_name]
     else:
         return_type = _parse_return_type_names(sections[num_sections-1][:-1])
@@ -136,19 +133,33 @@ for line in data:
 
         for lhs_type_name in _parse_type_names(sections[2]):
             lhs_type = STRING_TO_TYPE[lhs_type_name]
-            for rhs_type_name in _parse_type_names(sections[3]):
-                rhs_type = STRING_TO_TYPE[rhs_type_name]
+            if op_name in WRONG_RHS_TYPES:
+                rhs_type = WRONG_RHS_TYPES[op_name]
                 expression = 'BinaryExpression(' \
-                             '{lhs_type}, ' \
-                             'Keyword(\'{keyword}\'), ' \
-                             '{rhs_type}, {return_type}{init_code})'.format(
-                                 lhs_type=lhs_type.__name__,
-                                 keyword=op_name,
-                                 rhs_type=rhs_type.__name__,
-                                 return_type=return_type.__name__,
-                                 init_code=init_code
-                             )
+                    '{lhs_type}, ' \
+                    'Keyword(\'{keyword}\'), ' \
+                    '{rhs_type}, {return_type}{init_code})'.format(
+                        lhs_type=lhs_type.__name__,
+                        keyword=op_name,
+                        rhs_type=rhs_type.__name__,
+                        return_type=return_type.__name__,
+                        init_code=init_code
+                    )
                 expressions.append(expression)
+            else:
+                for rhs_type_name in _parse_type_names(sections[3]):
+                    rhs_type = STRING_TO_TYPE[rhs_type_name]
+                    expression = 'BinaryExpression(' \
+                        '{lhs_type}, ' \
+                        'Keyword(\'{keyword}\'), ' \
+                        '{rhs_type}, {return_type}{init_code})'.format(
+                            lhs_type=lhs_type.__name__,
+                            keyword=op_name,
+                            rhs_type=rhs_type.__name__,
+                            return_type=return_type.__name__,
+                            init_code=init_code
+                        )
+                    expressions.append(expression)
     elif num_sections == 5:
         if return_type in TYPE_TO_INIT_ARGS:
             init_code = ', action=lambda rhs, i: %s' % TYPE_TO_INIT_ARGS[return_type]

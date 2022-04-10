@@ -1922,6 +1922,7 @@ EXPRESSIONS = [
     BinaryExpression(Object, Keyword('forgettarget'), Object, Nothing),
     BinaryExpression(Group, Keyword('forgettarget'), Object, Nothing),
     BinaryExpression(ForType, Keyword('from'), Number, ForType),
+    BinaryExpression(HashMap, Keyword('get'), Anything, Anything),
     BinaryExpression(Object, Keyword('get3denattribute'), String, Array),
     BinaryExpression(Group, Keyword('get3denattribute'), String, Array),
     BinaryExpression(Array, Keyword('get3denattribute'), String, Array),
