@@ -227,6 +227,8 @@ EXPRESSIONS = [
     BinaryExpression(Number, Keyword('^'), Number, Number),
     BinaryExpression(Boolean, Keyword('||'), Boolean, Boolean),
     BinaryExpression(Boolean, Keyword('||'), Code, Boolean),
+    BinaryExpression(HashMap, Keyword('get'), Anything, Anything),
+    BinaryExpression(HashMap, Keyword('getOrDefault'), Array, Anything),
     UnaryExpression(Keyword('!'), Boolean, Boolean),
     UnaryExpression(Keyword('+'), Number, Number),
     UnaryExpression(Keyword('+'), Array, Array),
