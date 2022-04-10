@@ -61,6 +61,11 @@ WRONG_RETURN_TYPES = {
     'ammoonpylon': Anything
 }
 
+EXCLUDE = [
+    'get',
+    'getOrDefault'
+]
+
 
 def _parse_type_names(type_names):
     # Alternative types separated by _ char
@@ -114,7 +119,9 @@ for line in data:
     op_name = sections[1]
 
     # Return type always comes last (some operators have incorrect values for whatever reason)
-    if op_name in WRONG_RETURN_TYPES:
+    if op_name in EXCLUDE:
+        continue
+    elif op_name in WRONG_RETURN_TYPES:
         return_type = WRONG_RETURN_TYPES[op_name]
     else:
         return_type = _parse_return_type_names(sections[num_sections-1][:-1])
