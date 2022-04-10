@@ -3,7 +3,7 @@ import math
 from sqf.common_expressions import TryCatchExpression, ForEachExpression, \
     WhileDoExpression, ForFromToDoExpression, ForSpecDoExpression, SwitchDoExpression, \
     IfThenSpecExpression, IfThenElseExpression, IfThenExpression, IfThenExitWithExpression
-from sqf.types import Keyword, Namespace, Number, Array, HashMap, Code, Type, Boolean, String, Nothing, Variable
+from sqf.types import Anything, Keyword, Namespace, Number, Array, HashMap, Code, Type, Boolean, String, Nothing, Variable
 from sqf.exceptions import SQFParserError
 from sqf.keywords import OP_ARITHMETIC, OP_COMPARISON, OP_LOGICAL
 from sqf.expressions import BinaryExpression, UnaryExpression
@@ -369,6 +369,10 @@ INTERPRETER_EXPRESSIONS = [
                      Nothing, Action(lambda lhs_v, rhs_v: lhs_v.set(rhs_v))),
     BinaryExpression(HashMap, Keyword('set'), Array,
                      Nothing, Action(lambda lhs_v, rhs_v: lhs_v.set(rhs_v))),
+    BinaryExpression(HashMap, Keyword('get'), Anything,
+                     Nothing, Action(lambda lhs_v, rhs_v: lhs_v.get(rhs_v))),
+    BinaryExpression(HashMap, Keyword('getOrDefault'), Array,
+                     Nothing, Action(lambda lhs_v, rhs_v: lhs_v.getOrDefault(rhs_v))),
 
     # Array related
     BinaryExpression(Array, Keyword('resize'), Number,
