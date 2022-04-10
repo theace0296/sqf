@@ -61,9 +61,10 @@ WRONG_RETURN_TYPES = {
     'ammoonpylon': Anything
 }
 
+WRONG_LHS_TYPES = {}
+
 WRONG_RHS_TYPES = {
-    'get': Anything,
-    'getordefault': Array
+    'get': 'scalar_bool_string_code_side_config_namespace_nan_array'
 }
 
 
@@ -131,35 +132,25 @@ for line in data:
         if return_type in TYPE_TO_INIT_ARGS:
             init_code = ', action=lambda lhs, rhs, i: %s' % TYPE_TO_INIT_ARGS[return_type]
 
+        if op_name in WRONG_LHS_TYPES:
+            sections[2] = WRONG_RHS_TYPES[op_name]
         for lhs_type_name in _parse_type_names(sections[2]):
             lhs_type = STRING_TO_TYPE[lhs_type_name]
             if op_name in WRONG_RHS_TYPES:
-                rhs_type = WRONG_RHS_TYPES[op_name]
+                sections[3] = WRONG_RHS_TYPES[op_name]
+            for rhs_type_name in _parse_type_names(sections[3]):
+                rhs_type = STRING_TO_TYPE[rhs_type_name]
                 expression = 'BinaryExpression(' \
-                    '{lhs_type}, ' \
-                    'Keyword(\'{keyword}\'), ' \
-                    '{rhs_type}, {return_type}{init_code})'.format(
-                        lhs_type=lhs_type.__name__,
-                        keyword=op_name,
-                        rhs_type=rhs_type.__name__,
-                        return_type=return_type.__name__,
-                        init_code=init_code
-                    )
+                             '{lhs_type}, ' \
+                             'Keyword(\'{keyword}\'), ' \
+                             '{rhs_type}, {return_type}{init_code})'.format(
+                                 lhs_type=lhs_type.__name__,
+                                 keyword=op_name,
+                                 rhs_type=rhs_type.__name__,
+                                 return_type=return_type.__name__,
+                                 init_code=init_code
+                             )
                 expressions.append(expression)
-            else:
-                for rhs_type_name in _parse_type_names(sections[3]):
-                    rhs_type = STRING_TO_TYPE[rhs_type_name]
-                    expression = 'BinaryExpression(' \
-                        '{lhs_type}, ' \
-                        'Keyword(\'{keyword}\'), ' \
-                        '{rhs_type}, {return_type}{init_code})'.format(
-                            lhs_type=lhs_type.__name__,
-                            keyword=op_name,
-                            rhs_type=rhs_type.__name__,
-                            return_type=return_type.__name__,
-                            init_code=init_code
-                        )
-                    expressions.append(expression)
     elif num_sections == 5:
         if return_type in TYPE_TO_INIT_ARGS:
             init_code = ', action=lambda rhs, i: %s' % TYPE_TO_INIT_ARGS[return_type]
