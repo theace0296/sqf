@@ -1,4 +1,5 @@
-from sqf.types import Code, String, Number, Array, Type, Variable, Boolean, Namespace, _Statement, Nothing, Statement
+from operator import isub
+from sqf.types import Code, HashMap, String, Number, Array, Type, Variable, Boolean, Namespace, _Statement, Nothing, Statement
 
 
 class InterpreterType(Type):
@@ -21,6 +22,7 @@ class PrivateType(_InterpreterType):
     """
     A type to store the result of "private _x" as in "private _x = 2"
     """
+
     def __init__(self, variable):
         assert(isinstance(variable, Variable))
         super().__init__(variable)
@@ -62,8 +64,8 @@ class ForType(_InterpreterType):
     @property
     def is_undefined(self):
         return self.variable.is_undefined or \
-               self.from_ is not None and self.from_.is_undefined or \
-               self.to is not None and self.to.is_undefined
+            self.from_ is not None and self.from_.is_undefined or \
+            self.to is not None and self.to.is_undefined
 
     def copy(self, other):
         self.token = other.variable
@@ -76,6 +78,17 @@ class ForSpecType(_InterpreterType):
     def __init__(self, array):
         assert (isinstance(array, Array))
         super().__init__(array)
+
+    @property
+    def array(self):
+        return self.token
+
+
+class ForEachType(_InterpreterType):
+    def __init__(self, token):
+        assert (isinstance(token, Array) or isinstance(token, HashMap))
+        self._isHashMap = isinstance(token, HashMap)
+        super().__init__(token)
 
     @property
     def array(self):
@@ -172,6 +185,7 @@ class DefineResult(_Statement, InterpreterType):
 
     str(self) still returns the original tokens, but `result` can be used to evaluate the statement.
     """
+
     def __init__(self, tokens, define_statement, result):
         super().__init__(tokens)
         self.define_statement = define_statement
