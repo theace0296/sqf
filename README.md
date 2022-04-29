@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/LordGolias/sqf.svg?branch=master)](https://travis-ci.org/LordGolias/sqf)
-[![Coverage Status](https://coveralls.io/repos/github/LordGolias/sqf/badge.svg)](https://coveralls.io/github/LordGolias/sqf)
+![Test Status](https://github.com/theace0296/sqf/actions/workflows/tests.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/theace0296/sqf/badge.svg)](https://coveralls.io/github/theace0296/sqf)
 
 # SQF linter
 
